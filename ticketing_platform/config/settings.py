@@ -34,14 +34,15 @@ ALLOWED_HOSTS = (
     else ['*']
 )
 
-# CSRF trusted origins are derived automatically from ALLOWED_HOSTS so we
-# don't have to set a separate env var. Required by Django when the request
-# comes in over HTTPS (which Railway always does).
-CSRF_TRUSTED_ORIGINS = [
-    f"https://{h.strip()}"
-    for h in os.environ.get('ALLOWED_HOSTS', '').split(',')
-    if h.strip()
-]
+# Build CSRF_TRUSTED_ORIGINS — hardcode the Railway domain so it always works.
+_trusted = set()
+_trusted.add('https://web-production-a37bc.up.railway.app')
+if os.environ.get('ALLOWED_HOSTS'):
+    for h in os.environ['ALLOWED_HOSTS'].split(','):
+        h = h.strip()
+        if h:
+            _trusted.add(f'https://{h}')
+CSRF_TRUSTED_ORIGINS = list(_trusted)
 
 # ---- Apps ----------------------------------------------------------------
 
